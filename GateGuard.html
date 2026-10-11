@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GateGuard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f8f8;--surface:#fff;--ink:#1b3a40;--muted:#53696d;--line:#d5e0e2;--sky:#a5d8ea;--board:#0f4c81;--amber:#f2a33a;--red:#d9534f;--green:#2f8f6b;--accent:#1b3a40;--onaccent:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10262b;--surface:#173238;--ink:#e8f2f3;--muted:#9bb5b9;--line:#2a4a51;--accent:#a5d8ea;--onaccent:#10262b;--green:#5cc9a0}}
+:root[data-theme="dark"]{--bg:#10262b;--surface:#173238;--ink:#e8f2f3;--muted:#9bb5b9;--line:#2a4a51;--accent:#a5d8ea;--onaccent:#10262b;--green:#5cc9a0}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.55 "DM Sans",system-ui,sans-serif}
+h1,h2,h3{font-family:"Newsreader",Georgia,serif;font-weight:400;line-height:1.1;margin:0}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+header{display:flex;justify-content:space-between;align-items:center;padding:18px 0}
+.logo{font-family:"Newsreader",serif;font-size:24px;text-decoration:none}
+.btn{display:inline-block;background:var(--accent);color:var(--onaccent);border:0;border-radius:999px;padding:13px 26px;font:700 15px "DM Sans",sans-serif;cursor:pointer;text-decoration:none}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.hero{display:grid;grid-template-columns:1fr 1.1fr;gap:40px;align-items:center;padding:36px 0 64px}
+.hero h1{font-size:clamp(40px,6vw,68px);margin-bottom:18px}
+.hero p{font-size:19px;color:var(--muted);max-width:44ch;margin:0 0 26px}
+.board{background:var(--board);border-radius:10px;padding:14px 16px;color:#fff;font:700 13px/1 "DM Sans",sans-serif;box-shadow:0 18px 40px rgba(15,76,129,.28);overflow-x:auto}
+.board h3{font-family:"DM Sans",sans-serif;font-weight:700;font-size:20px;color:#cfe3ff;margin-bottom:10px}
+.row{display:grid;grid-template-columns:1.5fr .7fr .5fr .8fr 1.2fr;gap:8px;padding:10px 0;border-top:1px solid rgba(255,255,255,.14);min-width:430px;align-items:center}
+.row.head{color:#9fc3f0;border:0;padding:0 0 6px;font-size:11px}
+.st{color:var(--amber);transition:color .4s}
+.st.bad{color:#ff7b72}.st.ok{color:#7ee0a8}
+.row.hl{background:rgba(255,255,255,.08);margin:0 -8px;padding:10px 8px;border-radius:6px}
+section{padding:56px 0}
+section h2{font-size:clamp(30px,4vw,44px);margin-bottom:10px}
+.lead{color:var(--muted);max-width:56ch;margin:0 0 28px}
+.problems{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;border-top:1px solid var(--line);padding-top:28px}
+.problems h3{font-size:24px;margin-bottom:6px}
+.problems p{margin:0;color:var(--muted)}
+form{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:28px;display:grid;grid-template-columns:1fr 1fr;gap:18px 22px}
+label,legend{font-weight:700;font-size:14px;display:block;margin-bottom:6px}
+input[type=text],select{width:100%;padding:12px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);font:400 16px "DM Sans",sans-serif}
+fieldset{border:0;padding:0;margin:0}
+.full{grid-column:1/-1}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips label{margin:0;font-weight:500}
+.chips input{position:absolute;opacity:0}
+.chips span{display:inline-block;padding:9px 16px;border:1.5px solid var(--line);border-radius:999px;cursor:pointer;background:var(--bg)}
+.chips input:checked+span{background:var(--accent);color:var(--onaccent);border-color:var(--accent)}
+.chips input:focus-visible+span{outline:3px solid var(--amber);outline-offset:2px}
+#results{display:none}
+.summary{display:flex;flex-wrap:wrap;gap:12px 28px;align-items:center;justify-content:space-between;background:var(--accent);color:var(--onaccent);border-radius:18px;padding:22px 26px;margin-bottom:36px}
+.summary h2{font-size:30px;margin:0}
+.grid2{display:grid;grid-template-columns:1.1fr 1fr;gap:40px;align-items:start}
+.bar{height:6px;background:var(--line);border-radius:9px;margin:10px 0 18px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--green);transition:width .3s}
+ol.tl{list-style:none;margin:0;padding:0 0 0 26px;border-left:2px solid var(--line)}
+ol.tl li{position:relative;padding:0 0 22px 22px}
+ol.tl li::before{content:"";position:absolute;left:-35px;top:3px;width:16px;height:16px;border-radius:50%;background:var(--bg);border:2px solid var(--accent)}
+ol.tl li.done::before{background:var(--green);border-color:var(--green)}
+ol.tl li.done .t{text-decoration:line-through;color:var(--muted)}
+.when{font-size:13px;font-weight:700;color:var(--muted)}
+.tl label{display:flex;gap:10px;font-weight:500;font-size:16px;cursor:pointer;margin:2px 0}
+.tl small{display:block;color:var(--muted);margin-left:28px}
+.route{border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:18px 20px;margin-bottom:14px}
+.route.best{border:2px solid var(--green)}
+.route h3{font-size:22px;margin-bottom:4px}
+.route p{margin:4px 0 0;color:var(--muted);font-size:15px}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:3px 10px;border-radius:99px;background:var(--sky);color:#1b3a40;margin-bottom:8px}
+.ess{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:6px}
+.ess a{display:block;text-decoration:none;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:16px}
+.ess a:hover{border-color:var(--accent)}
+.ess b{display:block;font-family:"Newsreader",serif;font-size:20px;font-weight:400}
+.ess span{color:var(--muted);font-size:14px}
+.remind{display:flex;flex-wrap:wrap;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin-top:20px}
+.remind output{font:700 26px "DM Sans",sans-serif;font-variant-numeric:tabular-nums}
+.alert{display:none;background:var(--amber);color:#1b3a40;font-weight:700;padding:12px 18px;border-radius:10px;margin-top:12px;width:100%}
+.note{font-size:13px;color:var(--muted);margin-top:30px;max-width:70ch}
+footer{border-top:1px solid var(--line);padding:36px 0 48px;color:var(--muted)}
+footer p{max-width:60ch}
+@media(max-width:820px){.hero,.grid2,.problems,form{grid-template-columns:1fr}.hero{padding-top:12px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><a class="logo" href="#">GateGuard</a><a class="btn ghost" href="#plan">Plan my recovery</a></header>
+
+<div class="hero">
+<div>
+<h1>When plans change, your next step is made clear.</h1>
+<p>Tell GateGuard what got cancelled. Get a prioritised checklist, other ways to get there, and the nearest food, hotels and transport.</p>
+<a class="btn" href="#plan">Enter your disruption</a>
+</div>
+<div class="board" role="img" aria-label="Departure board showing a flight cancelled, then rebooked by GateGuard">
+<h3>Terminal A Departures</h3>
+<div class="row head"><span>Departing to</span><span>Flight</span><span>Gate</span><span>Time</span><span>Status</span></div>
+<div class="row"><span>Denver</span><span>SN 8908</span><span>20</span><span>3:21 PM</span><span></span></div>
+<div class="row"><span>Detroit</span><span>WS 8520</span><span>6</span><span>4:30 PM</span><span class="st">Delayed 7:17 PM</span></div>
+<div class="row hl" id="demo"><span>Houston</span><span>NZ 6599</span><span>24</span><span>3:58 PM</span><span class="st bad" id="demoSt">Cancelled</span></div>
+<div class="row"><span>Miami</span><span>UA 1511</span><span>16</span><span>1:00 PM</span><span></span></div>
+<div class="row"><span>Nashville</span><span>UA 1608</span><span>12</span><span>2:03 PM</span><span class="st">Delayed 3:05 PM</span></div>
+</div>
+</div>
+
+<section>
+<h2>Cancelled is more than one problem</h2>
+<p class="lead">One disruption, one recovery. GateGuard handles the three things that go wrong at once.</p>
+<div class="problems">
+<div><h3>You miss your connection</h3><p>You may not know which route to take next. GateGuard lays out alternatives that match your preferences.</p></div>
+<div><h3>You have nowhere to stay</h3><p>Finding a safe place to sleep gets stressful fast. We point you to hotels near your airport.</p></div>
+<div><h3>You are missing essentials</h3><p>Food, medication and ground transport still matter. They sit in your checklist, not in a separate search.</p></div>
+</div>
+</section>
+
+<section id="plan">
+<h2>Enter the disruption</h2>
+<p class="lead">Four details are enough to build your plan.</p>
+<form id="f">
+<div><label for="from">Airport you are stuck at</label><input id="from" type="text" placeholder="e.g. Newark (EWR)" required></div>
+<div><label for="to">Where you are going</label><input id="to" type="text" placeholder="e.g. Houston" required></div>
+<div><label for="fl">Cancelled flight</label><input id="fl" type="text" placeholder="e.g. UA 1511"></div>
+<div><label for="why">Reason given</label><select id="why"><option value="weather">Weather</option><option value="crew">Crew or staffing</option><option value="mech">Mechanical issue</option><option value="unk">Not told</option></select></div>
+<fieldset class="full"><legend>Your needs</legend>
+<div class="chips">
+<label><input type="checkbox" name="need" value="kids"><span>Travelling with children</span></label>
+<label><input type="checkbox" name="need" value="access"><span>Accessibility support</span></label>
+<label><input type="checkbox" name="need" value="meds"><span>Medication on hand</span></label>
+<label><input type="checkbox" name="need" value="night"><span>Need a place to sleep</span></label>
+<label><input type="checkbox" name="need" value="bag"><span>Checked bags</span></label>
+</div></fieldset>
+<fieldset class="full"><legend>What matters most</legend>
+<div class="chips">
+<label><input type="radio" name="pref" value="fast" checked><span>Arrive fastest</span></label>
+<label><input type="radio" name="pref" value="cheap"><span>Spend least</span></label>
+<label><input type="radio" name="pref" value="easy"><span>Least hassle</span></label>
+</div></fieldset>
+<div class="full"><button class="btn" type="submit">Build my plan</button></div>
+</form>
+</section>
+
+<section id="results" aria-live="polite">
+<div class="summary"><div><h2 id="sumT"></h2><div id="sumS"></div></div><button class="btn ghost" id="reset" type="button" style="color:var(--onaccent);border-color:currentColor">Start over</button></div>
+<div class="grid2">
+<div>
+<h2>Your action timeline</h2>
+<div class="bar" aria-hidden="true"><i id="prog"></i></div>
+<div id="progT" class="when"></div>
+<ol class="tl" id="tl"></ol>
+<div class="remind"><div><div class="when">Check your rebooking status in</div><output id="clock">20:00</output></div><button class="btn ghost" id="rBtn" type="button">Start reminder</button><div class="alert" id="alert" role="alert">Time to check: has your airline confirmed a new flight?</div></div>
+</div>
+<div>
+<h2>Other ways to get there</h2>
+<p class="lead" style="margin-bottom:16px">Ranked for what you said matters most.</p>
+<div id="routes"></div>
+</div>
+</div>
+<h2 style="margin-top:40px">Essentials near the airport</h2>
+<div class="ess" id="ess"></div>
+<p class="note">GateGuard gives you a plan and starting points; it does not see live flight inventory. Confirm options and fares with your airline. In the US, airlines generally owe a refund if they cancel and you choose not to travel, and meal or hotel help varies by airline and cause, so ask at the desk.</p>
+</section>
+</div>
+
+<footer><div class="wrap"><p>Flight cancellations are unpredictable, but being stranded should not mean being unprepared. GateGuard brings alternatives, nearby essentials and personalised guidance into one place.</p></div></footer>
+
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)};
+// hero board: cancelled -> rebooked loop
+var st=$('demoSt'),on=false;
+setInterval(function(){on=!on;st.textContent=on?'Rebooked 6:10 PM':'Cancelled';st.className='st '+(on?'ok':'bad')},3200);
+
+var theme=null;
+$('f').addEventListener('submit',function(e){
+e.preventDefault();
+var from=$('from').value.trim(),to=$('to').value.trim(),fl=$('fl').value.trim();
+var why=$('why').value;
+var needs=[].map.call(document.querySelectorAll('[name=need]:checked'),function(x){return x.value});
+var pref=document.querySelector('[name=pref]:checked').value;
+var has=function(k){return needs.indexOf(k)>-1};
+$('sumT').textContent=from+' to '+to;
+$('sumS').textContent=(fl?fl+' cancelled. ':'Flight cancelled. ')+'Plan built for '+({fast:'speed',cheap:'cost',easy:'low hassle'})[pref]+'.';
+buildTimeline(from,to,why,has);
+buildRoutes(from,to,pref,has);
+buildEss(from,has);
+$('results').style.display='block';
+$('results').scrollIntoView();
+});
+
+function buildTimeline(from,to,why,has){
+var s=[
+['Right now','Get in the rebooking queue','Open the airline app and join the desk line, and call the airline too. Whichever answers first wins.'],
+['Right now','Screenshot your cancellation and booking','You will need proof for refunds and rebooking.']
+];
+if(has('access'))s.push(['Right now','Ask for accessibility assistance','Tell the gate agent you need help moving between terminals, and ask for priority rebooking.']);
+if(has('kids'))s.push(['Within 10 min','Find a family-friendly spot and snacks','Settle children first so you can handle the calls calmly.']);
+if(has('meds'))s.push(['Within 10 min','Check your medication supply','Count doses until tomorrow night. If short, locate a pharmacy now.']);
+s.push(['Within 20 min','Ask for the next flight, or another airline','Request the earliest seat to '+to+'. Ask whether the airline can endorse you onto a partner.']);
+if(has('bag'))s.push(['Within 30 min','Confirm where your checked bags are','Ask whether they go through to '+to+' or must be collected.']);
+if(why!=='weather')s.push(['Within 30 min','Ask what the airline will cover','Cause matters: ask about meals, hotel and ground transport vouchers.']);
+if(has('night'))s.push(['Within 45 min','Book a hotel near '+from,'Check airline hotel rates and shuttles before paying. Rooms go quickly in mass cancellations.']);
+s.push(['Within 1 hr','Choose your route','If nothing confirmed, take an alternative from the list and ask for a refund of the unused ticket.']);
+s.push(['Later tonight','Notify your destination','Tell your host, hotel or ride that your arrival time has changed.']);
+var h='';s.forEach(function(x,i){h+='<li><div class="when">'+x[0]+'</div><label><input type="checkbox" data-i="'+i+'"><span class="t">'+x[1]+'</span></label><small>'+x[2]+'</small></li>'});
+$('tl').innerHTML=h;progress();
+}
+$('tl').addEventListener('change',function(e){e.target.closest('li').classList.toggle('done',e.target.checked);progress()});
+function progress(){var a=document.querySelectorAll('#tl input'),d=document.querySelectorAll('#tl input:checked');
+$('prog').style.width=(a.length?d.length/a.length*100:0)+'%';$('progT').textContent=d.length+' of '+a.length+' done'}
+
+function buildRoutes(from,to,pref,has){
+var r=[
+{n:'Rebook with your airline',d:'Usually free when the airline cancels. Ask for the first seat to '+to+', even on a different routing.',s:{fast:3,cheap:3,easy:3},tag:'Start here'},
+{n:'Switch to another airline',d:'Ask for an endorsement onto a partner carrier. If the answer is no, buy a one-way and request a refund for the unused ticket.',s:{fast:3,cheap:1,easy:2},tag:'Often fastest'},
+{n:'Fly from a nearby airport',d:'Search other airports within a ride of '+from+' and near '+to+'. Compare total cost including ground transport.',s:{fast:2,cheap:2,easy:1},tag:'Wider search'},
+{n:'Go by train, bus or rental car',d:'A solid backup if flights are full for a day or more. Check road and rail conditions before you commit.',s:{fast:1,cheap:2,easy:has('kids')||has('access')?1:2},tag:'Backup'},
+{n:'Wait for the next day',d:'Take a hotel and a confirmed seat on a morning flight. Lowest stress when you are tired or travelling with others.',s:{fast:0,cheap:1,easy:3},tag:'Rest first'}
+];
+r.sort(function(a,b){return b.s[pref]-a.s[pref]});
+$('routes').innerHTML=r.slice(0,4).map(function(x,i){return '<div class="route'+(i==0?' best':'')+'"><span class="tag">'+(i==0?'Best fit for you':x.tag)+'</span><h3>'+x.n+'</h3><p>'+x.d+'</p></div>'}).join('');
+}
+
+function buildEss(from,has){
+var q=function(t){return 'https://www.google.com/maps/search/'+encodeURIComponent(t+' near '+from+' airport')};
+var e=[['Hotels','Rooms and airport shuttles',q('hotels')],['Food','Open now, close to the terminal',q('restaurants open now')],['Pharmacy','Refills and basics',q('pharmacy')],['Transport','Rail, rideshare and rental cars',q('car rental train station')]];
+if(has('kids'))e.push(['Family spots','Parks and kid-friendly food',q('family friendly restaurants')]);
+$('ess').innerHTML=e.map(function(x){return '<a href="'+x[2]+'" target="_blank" rel="noopener"><b>'+x[0]+'</b><span>'+x[1]+'</span></a>'}).join('');
+}
+
+// reminder
+var t=null,left=1200;
+function show(){var m=Math.floor(left/60),s=left%60;$('clock').textContent=(m<10?'0':'')+m+':'+(s<10?'0':'')+s}
+$('rBtn').addEventListener('click',function(){
+if(t){clearInterval(t);t=null;left=1200;show();this.textContent='Start reminder';$('alert').style.display='none';return}
+this.textContent='Stop reminder';$('alert').style.display='none';
+t=setInterval(function(){left--;show();if(left<=0){clearInterval(t);t=null;left=1200;$('rBtn').textContent='Restart reminder';$('alert').style.display='block'}},1000);
+});
+$('reset').addEventListener('click',function(){$('results').style.display='none';document.getElementById('plan').scrollIntoView()});
+})();
+</script>
+</body>
+</html>
