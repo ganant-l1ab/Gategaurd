@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GateGuard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f6f8f8;--surface:#fff;--ink:#1b3a40;--muted:#53696d;--line:#d5e0e2;--sky:#a5d8ea;--board:#0f4c81;--amber:#f2a33a;--green:#2f8f6b;--accent:#1b3a40;--onaccent:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10262b;--surface:#173238;--ink:#e8f2f3;--muted:#9bb5b9;--line:#2a4a51;--accent:#a5d8ea;--onaccent:#10262b;--green:#5cc9a0}}
+:root[data-theme="dark"]{--bg:#10262b;--surface:#173238;--ink:#e8f2f3;--muted:#9bb5b9;--line:#2a4a51;--accent:#a5d8ea;--onaccent:#10262b;--green:#5cc9a0}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.55 "DM Sans",system-ui,sans-serif}
+h1,h2,h3{font-family:"Newsreader",Georgia,serif;font-weight:400;line-height:1.1;margin:0}
+:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+header{display:flex;justify-content:space-between;align-items:center;padding:18px 0}
+.logo{font-family:"Newsreader",serif;font-size:24px;text-decoration:none;color:inherit}
+.btn{display:inline-block;background:var(--accent);color:var(--onaccent);border:0;border-radius:999px;padding:12px 24px;font:700 15px "DM Sans",sans-serif;cursor:pointer;text-decoration:none}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.btn.sm{padding:8px 16px;font-size:14px}
+.hero{display:grid;grid-template-columns:1fr 1.1fr;gap:40px;align-items:center;padding:36px 0 56px}
+.hero h1{font-size:clamp(40px,6vw,68px);margin-bottom:18px}
+.hero p{font-size:19px;color:var(--muted);max-width:44ch;margin:0 0 26px}
+.board{background:var(--board);border-radius:10px;padding:14px 16px;color:#fff;font:700 13px/1 "DM Sans",sans-serif;box-shadow:0 18px 40px rgba(15,76,129,.28);overflow-x:auto}
+.board h3{font-family:"DM Sans",sans-serif;font-weight:700;font-size:20px;color:#cfe3ff;margin-bottom:10px}
+.row{display:grid;grid-template-columns:1.5fr .7fr .5fr .8fr 1.3fr;gap:8px;padding:10px 0;border-top:1px solid rgba(255,255,255,.14);min-width:430px;align-items:center}
+.row.head{color:#9fc3f0;border:0;padding:0 0 6px;font-size:11px}
+.st{color:var(--amber)}.st.bad{color:#ff7b72}.st.ok{color:#7ee0a8}
+.row.hl{background:rgba(255,255,255,.08);margin:0 -8px;padding:10px 8px;border-radius:6px}
+section{padding:48px 0}
+section h2{font-size:clamp(28px,4vw,42px);margin-bottom:10px}
+.lead{color:var(--muted);max-width:56ch;margin:0 0 24px}
+.problems{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;border-top:1px solid var(--line);padding-top:28px}
+.problems h3{font-size:24px;margin-bottom:6px}.problems p{margin:0;color:var(--muted)}
+form{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:28px;display:grid;grid-template-columns:1fr 1fr;gap:18px 22px}
+label,legend{font-weight:700;font-size:14px;display:block;margin-bottom:6px}
+input[type=text],input[type=number],select,textarea{width:100%;padding:12px 14px;border-radius:10px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);font:400 16px "DM Sans",sans-serif}
+textarea{resize:vertical;min-height:120px;line-height:1.5}
+fieldset{border:0;padding:0;margin:0}
+.full{grid-column:1/-1}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips label{margin:0;font-weight:500}
+.chips input{position:absolute;opacity:0}
+.chips span{display:inline-block;padding:9px 16px;border:1.5px solid var(--line);border-radius:999px;cursor:pointer;background:var(--bg)}
+.chips input:checked+span{background:var(--accent);color:var(--onaccent);border-color:var(--accent)}
+.chips input:focus-visible+span{outline:3px solid var(--amber);outline-offset:2px}
+#results{display:none}
+.summary{display:flex;flex-wrap:wrap;gap:12px 28px;align-items:center;justify-content:space-between;background:var(--accent);color:var(--onaccent);border-radius:18px;padding:22px 26px;margin-bottom:36px}
+.summary h2{font-size:30px;margin:0}
+.summary .btn{color:var(--onaccent);border-color:currentColor}
+.grid2{display:grid;grid-template-columns:1.1fr 1fr;gap:40px;align-items:start}
+.bar{height:6px;background:var(--line);border-radius:9px;margin:10px 0 8px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--green);transition:width .3s}
+.tools{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.when{font-size:13px;font-weight:700;color:var(--muted)}
+ol.tl{list-style:none;margin:0;padding:0 0 0 26px;border-left:2px solid var(--line)}
+ol.tl li{position:relative;padding:0 0 22px 22px}
+ol.tl li::before{content:"";position:absolute;left:-35px;top:3px;width:16px;height:16px;border-radius:50%;background:var(--bg);border:2px solid var(--accent)}
+ol.tl li.done::before{background:var(--green);border-color:var(--green)}
+ol.tl li.done .t{text-decoration:line-through;color:var(--muted)}
+ol.tl.calm li:not(.cur){display:none}
+ol.tl.calm li.cur .t{font-size:22px;font-family:"Newsreader",serif}
+.tl label{display:flex;gap:10px;font-weight:500;font-size:16px;cursor:pointer;margin:2px 0}
+.tl small{display:block;color:var(--muted);margin-left:28px}
+.route,.card{border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:18px 20px;margin-bottom:14px}
+.route.best{border:2px solid var(--green)}
+.route h3{font-size:22px;margin-bottom:4px}.route p{margin:4px 0 0;color:var(--muted);font-size:15px}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:3px 10px;border-radius:99px;background:var(--sky);color:#1b3a40;margin-bottom:8px}
+.ess{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px}
+.ess a{display:block;text-decoration:none;color:inherit;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:16px}
+.ess a:hover{border-color:var(--accent)}
+.ess b{display:block;font-family:"Newsreader",serif;font-size:20px;font-weight:400}
+.ess span{color:var(--muted);font-size:14px}
+.remind{display:flex;flex-wrap:wrap;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin-top:6px}
+.remind output{font:700 26px "DM Sans",sans-serif;font-variant-numeric:tabular-nums}
+.alert{display:none;background:var(--amber);color:#1b3a40;font-weight:700;padding:12px 18px;border-radius:10px;width:100%}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:48px;align-items:start}
+.seg{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.seg button[aria-pressed=true]{background:var(--accent);color:var(--onaccent);border-color:var(--accent)}
+.costrow{display:flex;gap:8px;margin-bottom:12px}
+.costrow input[type=text]{flex:2}.costrow input[type=number]{flex:1;min-width:0}
+ul.costs{list-style:none;margin:0 0 10px;padding:0}
+ul.costs li{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+ul.costs button{background:none;border:0;color:var(--muted);cursor:pointer;font:inherit;text-decoration:underline}
+.total{font:500 28px "Newsreader",serif;margin:8px 0 12px}
+.rights{color:var(--muted);font-size:15px}
+.rights li{margin-bottom:6px}
+.fb{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.note{font-size:13px;color:var(--muted);margin-top:30px;max-width:70ch}
+footer{border-top:1px solid var(--line);padding:36px 0 48px;color:var(--muted)}
+footer p{max-width:60ch}
+@media(max-width:820px){.hero,.grid2,.problems,form,.split{grid-template-columns:1fr}.hero{padding-top:12px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><a class="logo" href="#">GateGuard</a><a class="btn ghost" href="#plan">Plan my recovery</a></header>
+
+<div class="hero">
+<div>
+<h1>When plans change, your next step is made clear.</h1>
+<p>Tell GateGuard what got cancelled. Get a prioritised checklist, other ways to get there, ready-to-send messages, and the nearest food, hotels and transport.</p>
+<a class="btn" href="#plan">Enter your disruption</a>
+</div>
+<div class="board" role="img" aria-label="Departure board showing a flight cancelled, then rebooked by GateGuard">
+<h3>Terminal A Departures</h3>
+<div class="row head"><span>Departing to</span><span>Flight</span><span>Gate</span><span>Time</span><span>Status</span></div>
+<div class="row"><span>Denver</span><span>SN 8908</span><span>20</span><span>3:21 PM</span><span></span></div>
+<div class="row"><span>Detroit</span><span>WS 8520</span><span>6</span><span>4:30 PM</span><span class="st">Delayed 7:17 PM</span></div>
+<div class="row hl"><span>Houston</span><span>NZ 6599</span><span>24</span><span>3:58 PM</span><span class="st bad" id="demoSt">Cancelled</span></div>
+<div class="row"><span>Miami</span><span>UA 1511</span><span>16</span><span>1:00 PM</span><span></span></div>
+<div class="row"><span>Nashville</span><span>UA 1608</span><span>12</span><span>2:03 PM</span><span class="st">Delayed 3:05 PM</span></div>
+</div>
+</div>
+
+<section>
+<h2>Cancelled is more than one problem</h2>
+<p class="lead">One disruption, one recovery. GateGuard handles the three things that go wrong at once.</p>
+<div class="problems">
+<div><h3>You miss your connection</h3><p>You may not know which route to take next. GateGuard lays out alternatives that match your preferences.</p></div>
+<div><h3>You have nowhere to stay</h3><p>Finding a safe place to sleep gets stressful fast. We point you to hotels near your airport.</p></div>
+<div><h3>You are missing essentials</h3><p>Food, medication and ground transport still matter. They sit in your checklist, not in a separate search.</p></div>
+</div>
+</section>
+
+<section id="plan">
+<h2>Enter the disruption</h2>
+<p class="lead">Five details are enough to build your plan.</p>
+<form id="f">
+<div><label for="from">Airport you are stuck at</label><input id="from" type="text" placeholder="e.g. Newark (EWR)" required></div>
+<div><label for="to">Where you are going</label><input id="to" type="text" placeholder="e.g. Houston" required></div>
+<div><label for="fl">Cancelled flight</label><input id="fl" type="text" placeholder="e.g. UA 1511"></div>
+<div><label for="why">Reason given</label><select id="why"><option value="weather">Weather</option><option value="crew">Crew or staffing</option><option value="mech">Mechanical issue</option><option value="unk">Not told</option></select></div>
+<div><label for="reg">Where your flight departs</label><select id="reg"><option value="us">United States</option><option value="eu">EU or UK</option><option value="other">Somewhere else</option></select></div>
+<div><label for="name">Your name (for messages)</label><input id="name" type="text" placeholder="Optional"></div>
+<fieldset class="full"><legend>Your needs</legend>
+<div class="chips">
+<label><input type="checkbox" name="need" value="kids"><span>Travelling with children</span></label>
+<label><input type="checkbox" name="need" value="access"><span>Accessibility support</span></label>
+<label><input type="checkbox" name="need" value="meds"><span>Medication on hand</span></label>
+<label><input type="checkbox" name="need" value="night"><span>Need a place to sleep</span></label>
+<label><input type="checkbox" name="need" value="bag"><span>Checked bags</span></label>
+</div></fieldset>
+<fieldset class="full"><legend>What matters most</legend>
+<div class="chips">
+<label><input type="radio" name="pref" value="fast" checked><span>Arrive fastest</span></label>
+<label><input type="radio" name="pref" value="cheap"><span>Spend least</span></label>
+<label><input type="radio" name="pref" value="easy"><span>Least hassle</span></label>
+</div></fieldset>
+<div class="full"><button class="btn" type="submit">Build my plan</button></div>
+</form>
+</section>
+
+<section id="results" aria-live="polite">
+<div class="summary"><div><h2 id="sumT"></h2><div id="sumS"></div></div><button class="btn ghost" id="reset" type="button">Start over</button></div>
+<div class="grid2">
+<div>
+<h2>Your action timeline</h2>
+<div class="bar" aria-hidden="true"><i id="prog"></i></div>
+<div class="tools"><span id="progT" class="when"></span><button class="btn ghost sm" id="calm" type="button" aria-pressed="false">Calm mode: show one step</button></div>
+<ol class="tl" id="tl"></ol>
+<div class="remind"><div><div class="when">Check your rebooking status in</div><output id="clock">20:00</output></div><button class="btn ghost sm" id="rBtn" type="button">Start reminder</button><div class="alert" id="alert" role="alert">Time to check: has your airline confirmed a new flight?</div></div>
+</div>
+<div>
+<h2>Other ways to get there</h2>
+<p class="lead" style="margin-bottom:16px">Ranked for what you said matters most.</p>
+<div id="routes"></div>
+</div>
+</div>
+
+<h2 style="margin-top:40px;margin-bottom:14px">Essentials near the airport</h2>
+<div class="ess" id="ess"></div>
+
+<div class="split">
+<div>
+<h2>Message drafts</h2>
+<p class="lead" style="margin-bottom:14px">Pick who you are writing to, edit, then copy.</p>
+<div class="seg" id="seg">
+<button class="btn ghost sm" type="button" data-k="airline" aria-pressed="true">Airline</button>
+<button class="btn ghost sm" type="button" data-k="host" aria-pressed="false">Host or hotel</button>
+<button class="btn ghost sm" type="button" data-k="work" aria-pressed="false">Employer</button>
+</div>
+<label for="msg" class="when">Message</label>
+<textarea id="msg"></textarea>
+<p style="margin:10px 0 0"><button class="btn sm" id="copy" type="button">Copy message</button> <span id="copied" class="when" role="status"></span></p>
+</div>
+<div>
+<h2>Cost tracker</h2>
+<p class="lead" style="margin-bottom:14px">Log what you spend so you can ask for reimbursement.</p>
+<div class="costrow"><input id="cl" type="text" aria-label="What you bought" placeholder="e.g. Dinner"><input id="ca" type="number" min="0" step="0.01" aria-label="Amount" placeholder="Amount"><button class="btn sm" id="cadd" type="button">Add</button></div>
+<ul class="costs" id="costs"></ul>
+<div class="total" id="total">Total 0.00</div>
+<button class="btn ghost sm" id="ccopy" type="button">Copy expense list</button>
+<p class="note" style="margin-top:12px">Saved on this device only. Keep your real receipts too.</p>
+</div>
+</div>
+
+<div class="split" style="margin-top:36px">
+<div>
+<h2>What you may be owed</h2>
+<ul class="rights" id="rights" style="padding-left:20px;margin-top:12px"></ul>
+</div>
+<div>
+<h2>Was this helpful?</h2>
+<p class="lead" style="margin-bottom:12px">How stressed do you feel now? 1 is calm, 5 is very stressed.</p>
+<div class="fb" id="fb"></div>
+<p id="fbT" class="when" role="status" style="margin-top:10px"></p>
+</div>
+</div>
+<p class="note">GateGuard gives you a plan and starting points; it does not see live flight inventory. Confirm options and fares with your airline. This is general guidance, not legal advice.</p>
+</section>
+</div>
+
+<footer><div class="wrap"><p>Flight cancellations are unpredictable, but being stranded should not mean being unprepared. GateGuard brings alternatives, nearby essentials and personalised guidance into one place.</p></div></footer>
+
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)};
+var esc=function(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
+var store={get:function(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+var S={};
+
+var dst=$('demoSt'),on=false;
+setInterval(function(){on=!on;dst.textContent=on?'Rebooked 6:10 PM':'Cancelled';dst.className='st '+(on?'ok':'bad')},3200);
+
+$('f').addEventListener('submit',function(e){
+e.preventDefault();
+S={from:$('from').value.trim(),to:$('to').value.trim(),fl:$('fl').value.trim(),why:$('why').value,reg:$('reg').value,name:$('name').value.trim(),
+needs:[].map.call(document.querySelectorAll('[name=need]:checked'),function(x){return x.value}),
+pref:document.querySelector('[name=pref]:checked').value};
+S.has=function(k){return S.needs.indexOf(k)>-1};
+$('sumT').textContent=S.from+' to '+S.to;
+$('sumS').textContent=(S.fl?S.fl+' cancelled. ':'Flight cancelled. ')+'Plan built for '+({fast:'speed',cheap:'cost',easy:'low hassle'})[S.pref]+'.';
+timeline();routes();ess();rights();draft('airline');costs();
+$('results').style.display='block';$('results').scrollIntoView();
+});
+
+function timeline(){
+var f=esc(S.from),t=esc(S.to),h=S.has;
+var s=[
+['Right now','Get in the rebooking queue','Open the airline app and join the desk line, and call the airline too. Whichever answers first wins.'],
+['Right now','Screenshot your cancellation and booking','You will need proof for refunds and rebooking.']];
+if(h('access'))s.push(['Right now','Ask for accessibility assistance','Tell the gate agent you need help moving between terminals, and ask for priority rebooking.']);
+if(h('kids'))s.push(['Within 10 min','Find a family-friendly spot and snacks','Settle children first so you can handle the calls calmly.']);
+if(h('meds'))s.push(['Within 10 min','Check your medication supply','Count doses until tomorrow night. If short, locate a pharmacy now.']);
+s.push(['Within 20 min','Ask for the next flight, or another airline','Request the earliest seat to '+t+'. Ask whether the airline can endorse you onto a partner.']);
+if(h('bag'))s.push(['Within 30 min','Confirm where your checked bags are','Ask whether they go through to '+t+' or must be collected.']);
+if(S.why!=='weather')s.push(['Within 30 min','Ask what the airline will cover','Cause matters: ask about meals, hotel and ground transport.']);
+if(h('night'))s.push(['Within 45 min','Book a hotel near '+f,'Check airline hotel rates and shuttles before paying. Rooms go quickly in mass cancellations.']);
+s.push(['Within 1 hr','Choose your route','If nothing is confirmed, take an alternative from the list and request a refund of the unused ticket.']);
+s.push(['Within 1 hr','Send your messages','Use the drafts below to tell your host, hotel or employer about the change.']);
+var saved=store.get('gg-checks',{});
+$('tl').innerHTML=s.map(function(x,i){return '<li data-i="'+i+'"><div class="when">'+x[0]+'</div><label><input type="checkbox"'+(saved[x[1]]?' checked':'')+' data-k="'+esc(x[1])+'"><span class="t">'+x[1]+'</span></label><small>'+x[2]+'</small></li>'}).join('');
+progress();
+}
+$('tl').addEventListener('change',function(e){var c=store.get('gg-checks',{});c[e.target.dataset.k]=e.target.checked;store.set('gg-checks',c);progress()});
+function progress(){
+var li=document.querySelectorAll('#tl li'),n=0,cur=null;
+li.forEach(function(l){var ch=l.querySelector('input').checked;l.classList.toggle('done',ch);l.classList.remove('cur');if(ch)n++;else if(!cur)cur=l});
+if(cur)cur.classList.add('cur');
+$('prog').style.width=(li.length?n/li.length*100:0)+'%';
+$('progT').textContent=n+' of '+li.length+' done';
+}
+$('calm').addEventListener('click',function(){
+var p=this.getAttribute('aria-pressed')!=='true';
+this.setAttribute('aria-pressed',p);$('tl').classList.toggle('calm',p);
+this.textContent=p?'Calm mode on: show all steps':'Calm mode: show one step';
+});
+
+function routes(){
+var h=S.has,r=[
+{n:'Rebook with your airline',d:'Usually free when the airline cancels. Ask for the first seat to '+esc(S.to)+', even on a different routing.',s:{fast:3,cheap:3,easy:3},tag:'Start here'},
+{n:'Switch to another airline',d:'Ask for an endorsement onto a partner carrier. If the answer is no, buy a one-way and request a refund for the unused ticket.',s:{fast:3,cheap:1,easy:2},tag:'Often fastest'},
+{n:'Fly from a nearby airport',d:'Search other airports within a ride of '+esc(S.from)+' and near '+esc(S.to)+'. Compare total cost including ground transport.',s:{fast:2,cheap:2,easy:1},tag:'Wider search'},
+{n:'Go by train, bus or rental car',d:'A solid backup if flights are full for a day or more. Check road and rail conditions before you commit.',s:{fast:1,cheap:2,easy:(h('kids')||h('access'))?1:2},tag:'Backup'},
+{n:'Wait for the next day',d:'Take a hotel and a confirmed seat on a morning flight. Lowest stress when you are tired or travelling with others.',s:{fast:0,cheap:1,easy:3},tag:'Rest first'}];
+r.sort(function(a,b){return b.s[S.pref]-a.s[S.pref]});
+$('routes').innerHTML=r.slice(0,4).map(function(x,i){return '<div class="route'+(i==0?' best':'')+'"><span class="tag">'+(i==0?'Best fit for you':x.tag)+'</span><h3>'+x.n+'</h3><p>'+x.d+'</p></div>'}).join('');
+}
+
+function ess(){
+var q=function(t){return 'https://www.google.com/maps/search/'+encodeURIComponent(t+' near '+S.from+' airport')};
+var e=[['Hotels','Rooms and airport shuttles',q('hotels')],['Food','Open now, close to the terminal',q('restaurants open now')],['Pharmacy','Refills and basics',q('pharmacy')],['Transport','Rail, rideshare and rental cars',q('car rental train station')]];
+if(S.has('kids'))e.push(['Family spots','Parks and kid-friendly food',q('family friendly restaurants')]);
+if(S.has('access'))e.push(['Step-free hotels','Accessible rooms and transport',q('wheelchair accessible hotels')]);
+$('ess').innerHTML=e.map(function(x){return '<a href="'+x[2]+'" target="_blank" rel="noopener"><b>'+x[0]+'</b><span>'+x[1]+'</span></a>'}).join('');
+}
+
+function rights(){
+var us=['If the airline cancels and you decide not to travel, you are generally entitled to a refund to your original payment method.','Meal and hotel help is not guaranteed by federal rule. Ask what your airline\'s customer service commitments cover.','Keep receipts. Ask the agent to note on your booking that you requested help.'],
+eu=['You are generally entitled to a refund or rerouting at the earliest opportunity.','You can usually claim meals, refreshments and hotel with transfers while you wait.','Compensation may also apply depending on distance and cause. Weather and other extraordinary events usually do not qualify.'],
+ot=['Check the airline\'s conditions of carriage for cancellation and refund rules.','Ask at the desk about rerouting, meals and accommodation.','Your travel insurance or credit card may cover costs, so check them before you pay.'];
+$('rights').innerHTML=({us:us,eu:eu,other:ot})[S.reg].map(function(x){return '<li>'+x+'</li>'}).join('');
+}
+
+var kind='airline';
+function tmpl(k){
+var who=S.name||'[Your name]',fl=S.fl||'my flight',route=S.from+' to '+S.to;
+if(k==='host')return 'Hi,\n\nMy flight '+route+' ('+fl+') was cancelled, so my arrival is delayed. I am working on a new flight and will confirm the new time as soon as I have it.\n\nCould you let me know if a later arrival works, or if I should change anything about my booking?\n\nThank you,\n'+who;
+if(k==='work')return 'Hi,\n\nMy flight '+route+' ('+fl+') was cancelled by the airline. I am rebooking now and expect to be delayed. I will update you with a new arrival time once it is confirmed and will let you know about anything that affects my work.\n\nThanks,\n'+who;
+return 'Hello,\n\nMy flight '+fl+' from '+S.from+' to '+S.to+' was cancelled'+(S.why!=='unk'?' (reason given: '+({weather:'weather',crew:'crew or staffing',mech:'a mechanical issue'})[S.why]+')':'')+'. Please rebook me on the earliest available flight to '+S.to+', including partner airlines if that is faster.\n\nIf no suitable option is available, please refund my ticket in full. Please also tell me what meal, hotel or transport help you can provide.\n\nBooking name: '+who+'\nBooking reference: [add here]\n\nThank you.';
+}
+function draft(k){kind=k;$('msg').value=tmpl(k);document.querySelectorAll('#seg button').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.k===k)})}
+$('seg').addEventListener('click',function(e){if(e.target.dataset.k)draft(e.target.dataset.k)});
+function copy(text,el){
+var done=function(){el.textContent='Copied';setTimeout(function(){el.textContent=''},2000)};
+if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(done,function(){el.textContent='Press Ctrl+C to copy'})}else{el.textContent='Select the text and copy it'}
+}
+$('copy').addEventListener('click',function(){copy($('msg').value,$('copied'))});
+
+var items=store.get('gg-costs',[]);
+function costs(){
+$('costs').innerHTML=items.map(function(c,i){return '<li><span>'+esc(c.l)+'</span><span>'+c.a.toFixed(2)+' <button type="button" data-d="'+i+'" aria-label="Remove '+esc(c.l)+'">remove</button></span></li>'}).join('')||'<li class="when">No expenses yet. Add your first one above.</li>';
+$('total').textContent='Total '+items.reduce(function(s,c){return s+c.a},0).toFixed(2);
+}
+$('cadd').addEventListener('click',function(){
+var l=$('cl').value.trim(),a=parseFloat($('ca').value);
+if(!l||isNaN(a)||a<0){$('cl').focus();return}
+items.push({l:l,a:a});store.set('gg-costs',items);$('cl').value='';$('ca').value='';costs();
+});
+$('costs').addEventListener('click',function(e){if(e.target.dataset.d){items.splice(+e.target.dataset.d,1);store.set('gg-costs',items);costs()}});
+$('ccopy').addEventListener('click',function(){
+var t=items.map(function(c){return c.l+': '+c.a.toFixed(2)}).join('\n')+'\nTotal: '+items.reduce(function(s,c){return s+c.a},0).toFixed(2);
+copy(t,$('copied'));
+});
+
+var fb=$('fb');
+fb.innerHTML=[1,2,3,4,5].map(function(n){return '<button class="btn ghost sm" type="button" data-n="'+n+'">'+n+'</button>'}).join('');
+fb.addEventListener('click',function(e){if(e.target.dataset.n){store.set('gg-stress',e.target.dataset.n);$('fbT').textContent='Thanks. You chose '+e.target.dataset.n+'. This stays on your device.'}});
+
+var t=null,left=1200;
+function clock(){var m=Math.floor(left/60),s=left%60;$('clock').textContent=(m<10?'0':'')+m+':'+(s<10?'0':'')+s}
+$('rBtn').addEventListener('click',function(){
+if(t){clearInterval(t);t=null;left=1200;clock();this.textContent='Start reminder';$('alert').style.display='none';return}
+this.textContent='Stop reminder';$('alert').style.display='none';
+t=setInterval(function(){left--;clock();if(left<=0){clearInterval(t);t=null;left=1200;$('rBtn').textContent='Restart reminder';$('alert').style.display='block'}},1000);
+});
+$('reset').addEventListener('click',function(){$('results').style.display='none';$('plan').scrollIntoView()});
+})();
+</script>
+</body>
+</html>
